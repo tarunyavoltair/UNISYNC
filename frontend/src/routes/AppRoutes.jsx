@@ -1,3 +1,4 @@
+import Login from "../pages/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import StudentDashboard from "../pages/student/StudentDashboard";
@@ -9,10 +10,12 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Login />} />
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/faculty" element={<FacultyDashboard />} />
         <Route path="/club-admin" element={<ClubDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        
       </Routes>
     </BrowserRouter>
   );
