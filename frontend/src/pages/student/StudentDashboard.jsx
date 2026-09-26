@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 
@@ -39,7 +40,6 @@ function StudentDashboard() {
 
           {/* Main sections */}
           <div className="dashboard-sections">
-
             <section className="dashboard-section">
               <h2>📢 What's Happening Now?</h2>
 
@@ -86,7 +86,6 @@ function StudentDashboard() {
                 </div>
               </div>
             </section>
-
           </div>
 
           {/* Quick Actions */}
@@ -94,15 +93,39 @@ function StudentDashboard() {
             <h2>⚡ Quick Actions</h2>
 
             <div className="quick-action-grid">
-              <button>🔎 Report Lost Item</button>
-              <button>🗺️ Open Campus Map</button>
-              <button>👩‍🏫 Find Faculty</button>
-              <button>🏛️ Explore Clubs</button>
-              <button>📅 View Events</button>
-              <button>🏢 Book a Hall</button>
+              <Link to="/student/lost-found">
+                🔎 Report Lost Item
+              </Link>
+
+              <Link to="/student/map">
+                🗺️ Open Campus Map
+              </Link>
+
+              <Link to="/student/faculty">
+                👩‍🏫 Find Faculty
+              </Link>
+
+              <Link to="/student/clubs">
+                🏛️ Explore Clubs
+              </Link>
+
+              <Link to="/student/events">
+                📅 View Events
+              </Link>
+
+              <Link to="/student/hall-booking">
+                🏢 Book a Hall
+              </Link>
+
+              <Link to="/student/digital-id">
+                🪪 Digital ID
+              </Link>
+
+              <Link to="/student/achievements">
+                🏆 XP & Achievements
+              </Link>
             </div>
           </section>
-
         </main>
       </div>
     </div>
