@@ -120,7 +120,10 @@ const generateAIResponse = async (message) => {
     question.includes("student") ||
     question.includes("students") ||
     question.includes("profile") ||
-    question.includes("class")
+    question.includes("class") ||
+    question.includes("xp") ||
+    question.includes("department") ||
+    question.includes("year")
   ) {
     const students = await Student.find();
 
@@ -128,6 +131,80 @@ const generateAIResponse = async (message) => {
       return "No student information is currently available.";
     }
 
+    // Search for a specific student by name
+    const matchedStudent = students.find((student) => {
+      const studentName = student.name.toLowerCase();
+
+      return question.includes(studentName);
+    });
+
+    if (matchedStudent) {
+      return `Student: ${matchedStudent.name}
+Department: ${matchedStudent.department}
+Year: ${matchedStudent.year}
+Section: ${matchedStudent.section || "N/A"}
+XP: ${matchedStudent.xp}
+Email: ${matchedStudent.email}`;
+    }
+
+    // Find students by department
+    const matchedDepartment = students.filter((student) =>
+      question.includes(student.department.toLowerCase())
+    );
+
+    if (matchedDepartment.length > 0) {
+      const studentList = matchedDepartment
+        .map(
+          (student) =>
+            `${student.name} - Year ${student.year} - ${
+              student.section || "Section N/A"
+            } - XP: ${student.xp}`
+        )
+        .join("\n");
+
+      return `Students from ${matchedDepartment[0].department}:\n${studentList}`;
+    }
+
+    // Find students by year
+    const yearMatch = question.match(/\b(year|yr)\s*(\d+)\b/);
+
+    if (yearMatch) {
+      const requestedYear = Number(yearMatch[2]);
+
+      const yearStudents = students.filter(
+        (student) => student.year === requestedYear
+      );
+
+      if (yearStudents.length === 0) {
+        return `No students found in Year ${requestedYear}.`;
+      }
+
+      const studentList = yearStudents
+        .map(
+          (student) =>
+            `${student.name} - ${student.department} - ${
+              student.section || "Section N/A"
+            } - XP: ${student.xp}`
+        )
+        .join("\n");
+
+      return `Students in Year ${requestedYear}:\n${studentList}`;
+    }
+
+    // Find student with highest XP
+    if (
+      question.includes("highest xp") ||
+      question.includes("most xp") ||
+      question.includes("top xp")
+    ) {
+      const topStudent = students.reduce((highest, student) =>
+        student.xp > highest.xp ? student : highest
+      );
+
+      return `${topStudent.name} has the highest XP with ${topStudent.xp} XP.`;
+    }
+
+    // Default: show all students
     const studentList = students
       .map(
         (student) =>
