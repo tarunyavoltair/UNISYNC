@@ -1,5 +1,7 @@
 const Faculty = require("../../database/models/Faculty");
 const Event = require("../../database/models/Event");
+const Club = require("../../database/models/Club");
+const Hall = require("../../database/models/Hall");
 
 const generateAIResponse = async (message) => {
   if (!message || message.trim() === "") {
@@ -46,16 +48,49 @@ const generateAIResponse = async (message) => {
     return `Here are the campus events:\n${eventList}`;
   }
 
+  // Club-related questions
+  if (question.includes("club") || question.includes("society")) {
+    const clubs = await Club.find()
+      .populate("facultyCoordinator", "name")
+      .populate("president", "name");
+
+    if (clubs.length === 0) {
+      return "No clubs are currently available.";
+    }
+
+    const clubList = clubs
+      .map(
+        (club) =>
+          `${club.clubName} - ${club.category} - Faculty Coordinator: ${
+            club.facultyCoordinator?.name || "N/A"
+          } - President: ${club.president?.name || "N/A"}`
+      )
+      .join("\n");
+
+    return `Here are the campus clubs:\n${clubList}`;
+  }
+
+  // Hall-related questions
+  if (question.includes("hall") || question.includes("booking")) {
+    const halls = await Hall.find();
+
+    if (halls.length === 0) {
+      return "No halls are currently available.";
+    }
+
+    const hallList = halls
+      .map(
+        (hall) =>
+          `${hall.hallName} - ${hall.building} - Capacity: ${hall.capacity} - Availability: ${hall.availability}`
+      )
+      .join("\n");
+
+    return `Here are the available halls:\n${hallList}`;
+  }
+
+  // Lost & Found
   if (question.includes("lost") || question.includes("found")) {
     return "You can use the Lost & Found section to report or search for campus items.";
-  }
-
-  if (question.includes("club")) {
-    return "You can explore campus clubs and societies through the Clubs section.";
-  }
-
-  if (question.includes("hall") || question.includes("booking")) {
-    return "You can check available halls and make a hall booking through Hall Booking.";
   }
 
   return "I'm UNISYNC AI. I can help you find campus services, events, clubs, faculty, halls, and Lost & Found information.";
