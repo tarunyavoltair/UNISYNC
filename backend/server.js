@@ -10,12 +10,16 @@ const facultyRoutes = require("./routes/facultyRoutes");
 const clubRoutes = require("./routes/clubRoutes");
 const hallRoutes = require("./routes/hallRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const studentRoutes = require("./routes/studentRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 app.use("/api/lost-found", lostFoundRoutes);
 app.use("/api/faculty", facultyRoutes);
 app.use("/api/clubs", clubRoutes);
 app.use("/api/halls", hallRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "UNISYNC Backend API is running!" });
