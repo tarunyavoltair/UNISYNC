@@ -52,21 +52,104 @@ const generateAIResponse = async (message) => {
   }
 
   // Club-related questions
-  if (question.includes("club") || question.includes("society")) {
+  if (
+  question.includes("club") ||
+  question.includes("society") ||
+  question.includes("member") ||
+  question.includes("belong")
+) {
     const clubs = await Club.find()
       .populate("facultyCoordinator", "name")
-      .populate("president", "name");
+      .populate("president", "name")
+      .populate("members", "name department year");
 
     if (clubs.length === 0) {
       return "No clubs are currently available.";
     }
 
+    // Find a specific club by name
+    const matchedClub = clubs.find((club) =>
+      question.includes(club.clubName.toLowerCase())
+    );
+
+    if (matchedClub) {
+      // Show members of a specific club
+      if (
+        question.includes("member") ||
+        question.includes("members") ||
+        question.includes("belong")
+      ) {
+        if (!matchedClub.members || matchedClub.members.length === 0) {
+          return `${matchedClub.clubName} currently has no members listed.`;
+        }
+
+        const memberList = matchedClub.members
+          .map(
+            (member) =>
+              `${member.name} - ${member.department} - Year ${member.year}`
+          )
+          .join("\n");
+
+        return `Members of ${matchedClub.clubName}:\n${memberList}`;
+      }
+
+      // Show details of a specific club
+      return `Club: ${matchedClub.clubName}
+Category: ${matchedClub.category}
+Faculty Coordinator: ${
+        matchedClub.facultyCoordinator?.name || "N/A"
+      }
+President: ${matchedClub.president?.name || "N/A"}
+Members: ${matchedClub.members?.length || 0}
+Meeting Location: ${matchedClub.meetingLocation || "N/A"}
+Meeting Time: ${matchedClub.meetingTime || "N/A"}`;
+    }
+
+    // Find clubs that a specific student belongs to
+    const students = await Student.find();
+
+    const matchedStudent = students.find((student) =>
+      question.includes(student.name.toLowerCase())
+    );
+
+    if (
+      matchedStudent &&
+      (question.includes("club") ||
+        question.includes("society") ||
+        question.includes("belong"))
+    ) {
+      const studentClubs = clubs.filter((club) =>
+        club.members?.some(
+          (member) =>
+            member._id.toString() === matchedStudent._id.toString()
+        )
+      );
+
+      if (studentClubs.length === 0) {
+        return `${matchedStudent.name} is not currently listed as a member of any club.`;
+      }
+
+      const clubList = studentClubs
+        .map(
+          (club) =>
+            `${club.clubName} - ${club.category} - Meeting: ${
+              club.meetingLocation || "N/A"
+            } at ${club.meetingTime || "N/A"}`
+        )
+        .join("\n");
+
+      return `Clubs of ${matchedStudent.name}:\n${clubList}`;
+    }
+
+    // Default: show all clubs
     const clubList = clubs
       .map(
         (club) =>
           `${club.clubName} - ${club.category} - Faculty Coordinator: ${
             club.facultyCoordinator?.name || "N/A"
-          } - President: ${club.president?.name || "N/A"}`
+          } - President: ${club.president?.name || "N/A"} - Members: ${
+            club.members?.length || 0
+          }`
       )
       .join("\n");
 
@@ -239,5 +322,5 @@ Email: ${matchedStudent.email}`;
 };
 
 module.exports = {
-  generateAIResponse
+  generateAIResponse,
 };
