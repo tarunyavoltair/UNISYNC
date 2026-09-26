@@ -24,6 +24,8 @@ function Sidebar() {
         <Link to="/student/digital-id">🪪 Digital ID</Link>
 
         <Link to="/student/achievements">🏆 XP & Achievements</Link>
+
+        <Link to="/student/ai">🤖 UNISYNC AI</Link>
       </nav>
     </aside>
   );
