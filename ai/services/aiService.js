@@ -3,6 +3,7 @@ const Event = require("../../database/models/Event");
 const Club = require("../../database/models/Club");
 const Hall = require("../../database/models/Hall");
 const LostItem = require("../../database/models/LostItem");
+const Booking = require("../../database/models/Booking");
 
 const generateAIResponse = async (message) => {
   if (!message || message.trim() === "") {
@@ -71,8 +72,32 @@ const generateAIResponse = async (message) => {
     return `Here are the campus clubs:\n${clubList}`;
   }
 
+  // Booking-related questions
+  if (question.includes("booking") || question.includes("booked")) {
+    const bookings = await Booking.find()
+      .populate("hall", "hallName")
+      .populate("bookedBy", "name");
+
+    if (bookings.length === 0) {
+      return "No hall bookings are currently available.";
+    }
+
+    const bookingList = bookings
+      .map(
+        (booking) =>
+          `${booking.eventName} - ${booking.hall?.hallName || "N/A"} - Booked by: ${
+            booking.bookedBy?.name || "N/A"
+          } - ${booking.date.toDateString()} - ${booking.startTime} to ${
+            booking.endTime
+          } - Status: ${booking.status}`
+      )
+      .join("\n");
+
+    return `Here are the hall bookings:\n${bookingList}`;
+  }
+
   // Hall-related questions
-  if (question.includes("hall") || question.includes("booking")) {
+  if (question.includes("hall")) {
     const halls = await Hall.find();
 
     if (halls.length === 0) {
@@ -107,7 +132,7 @@ const generateAIResponse = async (message) => {
     return `Here are the Lost & Found items:\n${itemList}`;
   }
 
-  return "I'm UNISYNC AI. I can help you find campus services, events, clubs, faculty, halls, and Lost & Found information.";
+  return "I'm UNISYNC AI. I can help you find campus services, events, clubs, faculty, halls, bookings, and Lost & Found information.";
 };
 
 module.exports = {
