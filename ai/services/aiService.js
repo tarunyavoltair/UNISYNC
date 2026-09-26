@@ -4,6 +4,7 @@ const Club = require("../../database/models/Club");
 const Hall = require("../../database/models/Hall");
 const LostItem = require("../../database/models/LostItem");
 const Booking = require("../../database/models/Booking");
+const Student = require("../../database/models/Student");
 
 const generateAIResponse = async (message) => {
   if (!message || message.trim() === "") {
@@ -114,6 +115,31 @@ const generateAIResponse = async (message) => {
     return `Here are the available halls:\n${hallList}`;
   }
 
+  // Student-related questions
+  if (
+    question.includes("student") ||
+    question.includes("students") ||
+    question.includes("profile") ||
+    question.includes("class")
+  ) {
+    const students = await Student.find();
+
+    if (students.length === 0) {
+      return "No student information is currently available.";
+    }
+
+    const studentList = students
+      .map(
+        (student) =>
+          `${student.name} - ${student.department} - Year ${student.year} - ${
+            student.section || "Section N/A"
+          } - XP: ${student.xp}`
+      )
+      .join("\n");
+
+    return `Here are the students:\n${studentList}`;
+  }
+
   // Lost & Found
   if (question.includes("lost") || question.includes("found")) {
     const items = await LostItem.find();
@@ -132,7 +158,7 @@ const generateAIResponse = async (message) => {
     return `Here are the Lost & Found items:\n${itemList}`;
   }
 
-  return "I'm UNISYNC AI. I can help you find campus services, events, clubs, faculty, halls, bookings, and Lost & Found information.";
+  return "I'm UNISYNC AI. I can help you find campus services, events, clubs, faculty, halls, bookings, students, and Lost & Found information.";
 };
 
 module.exports = {
