@@ -2,6 +2,7 @@ const Faculty = require("../../database/models/Faculty");
 const Event = require("../../database/models/Event");
 const Club = require("../../database/models/Club");
 const Hall = require("../../database/models/Hall");
+const LostItem = require("../../database/models/LostItem");
 
 const generateAIResponse = async (message) => {
   if (!message || message.trim() === "") {
@@ -90,7 +91,20 @@ const generateAIResponse = async (message) => {
 
   // Lost & Found
   if (question.includes("lost") || question.includes("found")) {
-    return "You can use the Lost & Found section to report or search for campus items.";
+    const items = await LostItem.find();
+
+    if (items.length === 0) {
+      return "No lost or found items are currently available.";
+    }
+
+    const itemList = items
+      .map(
+        (item) =>
+          `${item.itemName} - ${item.category} - ${item.location} - Status: ${item.status}`
+      )
+      .join("\n");
+
+    return `Here are the Lost & Found items:\n${itemList}`;
   }
 
   return "I'm UNISYNC AI. I can help you find campus services, events, clubs, faculty, halls, and Lost & Found information.";
