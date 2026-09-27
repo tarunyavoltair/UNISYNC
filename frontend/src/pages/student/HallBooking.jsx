@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import { get, post } from "../../services/api";
 
 function HallBooking() {
   const [selectedHall, setSelectedHall] = useState(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [halls, setHalls] = useState([]);
+  const [student, setStudent] = useState(null);
 
   const [bookingForm, setBookingForm] = useState({
     date: "",
@@ -13,50 +16,28 @@ function HallBooking() {
     purpose: "",
   });
 
-  const halls = [
-    {
-      name: "Main Auditorium",
-      capacity: 500,
-      location: "Main Academic Block",
-      facilities: "Projector, Sound System, Stage",
-      status: "Available",
-    },
-    {
-      name: "Seminar Hall",
-      capacity: 150,
-      location: "Technology Block - 1st Floor",
-      facilities: "Projector, AC, Audio System",
-      status: "Available",
-    },
-    {
-      name: "Conference Hall",
-      capacity: 80,
-      location: "Administrative Block",
-      facilities: "Projector, Video Conferencing",
-      status: "Available",
-    },
-    {
-      name: "Mini Auditorium",
-      capacity: 200,
-      location: "Student Activity Block",
-      facilities: "Stage, Sound System, Projector",
-      status: "Booked",
-    },
-    {
-      name: "Innovation Lab",
-      capacity: 60,
-      location: "Technology Block - 2nd Floor",
-      facilities: "Computers, Projector, Whiteboard",
-      status: "Available",
-    },
-    {
-      name: "Open Air Theatre",
-      capacity: 300,
-      location: "College Ground",
-      facilities: "Stage, Lighting, Sound System",
-      status: "Available",
-    },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [hallData, studentData] = await Promise.all([
+          get("/halls"),
+          get("/students"),
+        ]);
+
+        setHalls(hallData);
+
+        const currentStudent = studentData.find(
+          (item) => item.studentId === "STU001"
+        );
+
+        setStudent(currentStudent);
+      } catch (error) {
+        console.error("Failed to load hall booking data:", error);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const handleInputChange = (e) => {
     setBookingForm({
@@ -65,18 +46,39 @@ function HallBooking() {
     });
   };
 
-  const handleBooking = (e) => {
+  const handleBooking = async (e) => {
     e.preventDefault();
 
-    setBookingSuccess(true);
-    setSelectedHall(null);
+    if (!student) {
+      alert("Student information could not be loaded.");
+      return;
+    }
 
-    setBookingForm({
-      date: "",
-      startTime: "",
-      endTime: "",
-      purpose: "",
-    });
+    try {
+      await post("/bookings", {
+        hall: selectedHall._id,
+        bookedBy: student._id,
+        eventName: bookingForm.purpose,
+        date: bookingForm.date,
+        startTime: bookingForm.startTime,
+        endTime: bookingForm.endTime,
+        purpose: bookingForm.purpose,
+        status: "pending",
+      });
+
+      setBookingSuccess(true);
+      setSelectedHall(null);
+
+      setBookingForm({
+        date: "",
+        startTime: "",
+        endTime: "",
+        purpose: "",
+      });
+    } catch (error) {
+      console.error("Failed to submit booking:", error);
+      alert("Failed to submit booking request. Please try again.");
+    }
   };
 
   return (
@@ -104,50 +106,57 @@ function HallBooking() {
             <h2>Available Halls</h2>
 
             <div className="hall-grid">
-              {halls.map((hall, index) => (
-                <div className="hall-card" key={index}>
-                  <div className="hall-icon">🏢</div>
+              {halls.length > 0 ? (
+                halls.map((hall) => (
+                  <div className="hall-card" key={hall._id}>
+                    <div className="hall-icon">🏢</div>
 
-                  <h3>{hall.name}</h3>
+                    <h3>{hall.hallName}</h3>
 
-                  <p>
-                    <strong>👥 Capacity:</strong> {hall.capacity}
-                  </p>
+                    <p>
+                      <strong>👥 Capacity:</strong> {hall.capacity}
+                    </p>
 
-                  <p>
-                    <strong>📍 Location:</strong> {hall.location}
-                  </p>
+                    <p>
+                      <strong>📍 Location:</strong> {hall.location}
+                    </p>
 
-                  <p>
-                    <strong>🛠️ Facilities:</strong> {hall.facilities}
-                  </p>
+                    <p>
+                      <strong>🛠️ Facilities:</strong>{" "}
+                      {hall.facilities && hall.facilities.length > 0
+                        ? hall.facilities.join(", ")
+                        : "Not specified"}
+                    </p>
 
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    <span
-                      className={
-                        hall.status === "Available"
-                          ? "hall-available"
-                          : "hall-booked"
-                      }
+                    <p>
+                      <strong>Status:</strong>{" "}
+                      <span
+                        className={
+                          hall.availability === "available"
+                            ? "hall-available"
+                            : "hall-booked"
+                        }
+                      >
+                        {hall.availability}
+                      </span>
+                    </p>
+
+                    <button
+                      disabled={hall.availability !== "available"}
+                      onClick={() => {
+                        setSelectedHall(hall);
+                        setBookingSuccess(false);
+                      }}
                     >
-                      {hall.status}
-                    </span>
-                  </p>
-
-                  <button
-                    disabled={hall.status === "Booked"}
-                    onClick={() => {
-                      setSelectedHall(hall);
-                      setBookingSuccess(false);
-                    }}
-                  >
-                    {hall.status === "Available"
-                      ? "Book Hall"
-                      : "Currently Booked"}
-                  </button>
-                </div>
-              ))}
+                      {hall.availability === "available"
+                        ? "Book Hall"
+                        : "Currently Unavailable"}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p>Loading halls...</p>
+              )}
             </div>
           </section>
 
@@ -156,7 +165,7 @@ function HallBooking() {
               <h2>📋 Request Hall Booking</h2>
 
               <p>
-                Selected Hall: <strong>{selectedHall.name}</strong>
+                Selected Hall: <strong>{selectedHall.hallName}</strong>
               </p>
 
               <form onSubmit={handleBooking}>

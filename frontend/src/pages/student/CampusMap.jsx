@@ -1,8 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import { get } from "../../services/api";
 
 function CampusMap() {
+  const [locations, setLocations] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadLocations = async () => {
+      try {
+        const data = await get("/campus-locations");
+        setLocations(data);
+      } catch (error) {
+        console.error("Failed to load campus locations:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLocations();
+  }, []);
+
+  const filteredLocations = locations.filter((location) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      location.name.toLowerCase().includes(searchText) ||
+      location.building.toLowerCase().includes(searchText) ||
+      location.category.toLowerCase().includes(searchText)
+    );
+  });
+
   return (
     <div className="dashboard-container">
       <Navbar />
@@ -18,54 +48,67 @@ function CampusMap() {
             the campus.
           </p>
 
+          {/* Search */}
           <div className="map-search">
             <input
               type="text"
               placeholder="Search campus location..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
-            <button>Search</button>
+
+            <button type="button">
+              Search
+            </button>
           </div>
 
+          {/* Locations */}
           <section className="locations-section">
             <h2>Campus Locations</h2>
 
-            <div className="locations-grid">
-              <div className="location-card">
-                <h3>📚 Library</h3>
-                <p>Main Academic Block</p>
-                <button>View Location</button>
-              </div>
+            {loading ? (
+              <p>Loading campus locations...</p>
+            ) : filteredLocations.length > 0 ? (
+              <div className="locations-grid">
+                {filteredLocations.map((location) => (
+                  <div
+                    className="location-card"
+                    key={location._id}
+                  >
+                    <h3>
+                      {location.icon} {location.name}
+                    </h3>
 
-              <div className="location-card">
-                <h3>💻 Computer Lab</h3>
-                <p>Technology Block - 2nd Floor</p>
-                <button>View Location</button>
-              </div>
+                    <p>
+                      {location.description}
+                    </p>
 
-              <div className="location-card">
-                <h3>🍴 Cafeteria</h3>
-                <p>Student Activity Block</p>
-                <button>View Location</button>
-              </div>
+                    <p>
+                      <strong>📍 Building:</strong>{" "}
+                      {location.building}
+                    </p>
 
-              <div className="location-card">
-                <h3>🏥 Medical Room</h3>
-                <p>Administrative Block - Ground Floor</p>
-                <button>View Location</button>
-              </div>
+                    <p>
+                      <strong>🏢 Floor:</strong>{" "}
+                      {location.floor}
+                    </p>
 
-              <div className="location-card">
-                <h3>🏟️ College Ground</h3>
-                <p>Sports Complex</p>
-                <button>View Location</button>
-              </div>
+                    <p>
+                      <strong>📂 Category:</strong>{" "}
+                      {location.category}
+                    </p>
 
-              <div className="location-card">
-                <h3>🚗 Parking</h3>
-                <p>North Campus Entrance</p>
-                <button>View Location</button>
+                    <button type="button">
+                      View Location
+                    </button>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <p>
+                No campus locations found.
+              </p>
+            )}
           </section>
         </main>
       </div>

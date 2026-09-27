@@ -1,70 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import { get } from "../../services/api";
 
 function Events() {
   const [search, setSearch] = useState("");
+  const [events, setEvents] = useState([]);
 
-  const events = [
-    {
-      name: "Tech Fest 2026",
-      category: "Technology",
-      date: "October 5, 2026",
-      time: "10:00 AM",
-      location: "Main Auditorium",
-      description:
-        "A campus technology festival featuring coding contests, workshops and project exhibitions.",
-    },
-    {
-      name: "Cultural Fest",
-      category: "Cultural",
-      date: "October 12, 2026",
-      time: "4:00 PM",
-      location: "College Ground",
-      description:
-        "Enjoy music, dance, performances and cultural activities conducted by student clubs.",
-    },
-    {
-      name: "Coding Competition",
-      category: "Competition",
-      date: "October 18, 2026",
-      time: "9:00 AM",
-      location: "Computer Lab",
-      description:
-        "Test your programming skills and compete with students across the campus.",
-    },
-    {
-      name: "Robotics Workshop",
-      category: "Workshop",
-      date: "October 22, 2026",
-      time: "2:00 PM",
-      location: "Technology Block",
-      description:
-        "Hands-on workshop covering robotics, sensors and automation.",
-    },
-    {
-      name: "Sports Meet",
-      category: "Sports",
-      date: "November 2, 2026",
-      time: "8:00 AM",
-      location: "Sports Complex",
-      description:
-        "Participate in athletics, team sports and other campus competitions.",
-    },
-    {
-      name: "Photography Walk",
-      category: "Club Event",
-      date: "November 8, 2026",
-      time: "3:00 PM",
-      location: "Campus Garden",
-      description:
-        "Explore the campus with fellow photography enthusiasts and capture creative moments.",
-    },
-  ];
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const data = await get("/events");
+        setEvents(data);
+      } catch (error) {
+        console.error("Failed to load events:", error);
+      }
+    };
+
+    loadEvents();
+  }, []);
 
   const filteredEvents = events.filter(
     (event) =>
-      event.name.toLowerCase().includes(search.toLowerCase()) ||
+      event.eventName.toLowerCase().includes(search.toLowerCase()) ||
       event.category.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -97,29 +55,50 @@ function Events() {
 
             <div className="events-grid">
               {filteredEvents.length > 0 ? (
-                filteredEvents.map((event, index) => (
-                  <div className="event-card" key={index}>
+                filteredEvents.map((event) => (
+                  <div className="event-card" key={event._id}>
                     <div className="event-icon">📅</div>
 
-                    <h3>{event.name}</h3>
+                    <h3>{event.eventName}</h3>
 
                     <p className="event-category">
                       {event.category}
                     </p>
 
                     <p>
-                      <strong>📆 Date:</strong> {event.date}
+                      <strong>📆 Date:</strong>{" "}
+                      {new Date(event.date).toLocaleDateString()}
                     </p>
 
                     <p>
-                      <strong>⏰ Time:</strong> {event.time}
+                      <strong>⏰ Time:</strong>{" "}
+                      {event.startTime} - {event.endTime}
                     </p>
 
                     <p>
-                      <strong>📍 Location:</strong> {event.location}
+                      <strong>📍 Location:</strong>{" "}
+                      {event.location}
                     </p>
 
-                    <p>{event.description}</p>
+                    <p>
+                      {event.description ||
+                        "No description available."}
+                    </p>
+
+                    <p>
+                      <strong>🎯 XP Reward:</strong>{" "}
+                      {event.xpReward} XP
+                    </p>
+
+                    <p>
+                      <strong>👥 Attendees:</strong>{" "}
+                      {event.attendees
+                        ? event.attendees.length
+                        : 0}
+                      {event.maxAttendees
+                        ? ` / ${event.maxAttendees}`
+                        : ""}
+                    </p>
 
                     <button>Register</button>
                   </div>

@@ -17,6 +17,7 @@ function StudentAI() {
 
     const userQuestion = question.trim();
 
+    // Add user's question to chat
     setMessages((prev) => [
       ...prev,
       {
@@ -29,13 +30,15 @@ function StudentAI() {
     setLoading(true);
 
     try {
+      // Send "message" because the backend expects req.body.message
       const response = await post("/ai", {
-        question: userQuestion,
+        message: userQuestion,
       });
 
+      // Backend currently returns { message, response }
       const aiMessage =
-        response?.answer ||
         response?.response ||
+        response?.answer ||
         response?.message ||
         "Sorry, I could not find an answer.";
 
@@ -53,7 +56,8 @@ function StudentAI() {
         ...prev,
         {
           type: "ai",
-          text: "Unable to connect to UNISYNC AI right now. Please try again later.",
+          text:
+            "Unable to connect to UNISYNC AI right now. Please try again later.",
         },
       ]);
     } finally {
@@ -82,9 +86,7 @@ function StudentAI() {
 
               <div>
                 <h2>How can I help you?</h2>
-                <p>
-                  Your smart campus assistant
-                </p>
+                <p>Your smart campus assistant</p>
               </div>
             </div>
 
@@ -130,7 +132,9 @@ function StudentAI() {
               {messages.length === 0 ? (
                 <div className="ai-welcome">
                   <span>🤖</span>
+
                   <h3>Hello! I'm UNISYNC AI</h3>
+
                   <p>
                     Ask me anything about your campus.
                   </p>

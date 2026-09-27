@@ -1,10 +1,13 @@
 const express = require("express");
+
 const router = express.Router();
 
 const {
   getClubs
 } = require("../controllers/clubController");
 
-router.get("/", getClubs);
+const { protect } = require("../middleware/authMiddleware");
+
+router.get("/", protect, getClubs);
 
 module.exports = router;

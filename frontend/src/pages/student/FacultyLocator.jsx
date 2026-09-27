@@ -1,48 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import { get } from "../../services/api";
 
 function FacultyLocator() {
   const [search, setSearch] = useState("");
+  const [faculty, setFaculty] = useState([]);
 
-  const faculty = [
-    {
-      name: "Dr. Priya Kumar",
-      department: "Computer Science",
-      room: "CSE - 204",
-      status: "Available",
-    },
-    {
-      name: "Dr. Arun Raj",
-      department: "Information Technology",
-      room: "IT - 301",
-      status: "In Class",
-    },
-    {
-      name: "Ms. Kavya Sharma",
-      department: "Computer Science",
-      room: "CSE - 105",
-      status: "Available",
-    },
-    {
-      name: "Dr. Ramesh Kumar",
-      department: "Electronics",
-      room: "ECE - 202",
-      status: "Busy",
-    },
-    {
-      name: "Ms. Anitha Devi",
-      department: "Mathematics",
-      room: "MATH - 101",
-      status: "Available",
-    },
-    {
-      name: "Dr. Vijay Kumar",
-      department: "Mechanical Engineering",
-      room: "MECH - 305",
-      status: "In Class",
-    },
-  ];
+  useEffect(() => {
+    const loadFaculty = async () => {
+      try {
+        const data = await get("/faculty");
+        setFaculty(data);
+      } catch (error) {
+        console.error("Failed to load faculty:", error);
+      }
+    };
+
+    loadFaculty();
+  }, []);
 
   const filteredFaculty = faculty.filter(
     (member) =>
@@ -79,8 +55,11 @@ function FacultyLocator() {
 
             <div className="faculty-grid">
               {filteredFaculty.length > 0 ? (
-                filteredFaculty.map((member, index) => (
-                  <div className="faculty-card" key={index}>
+                filteredFaculty.map((member) => (
+                  <div
+                    className="faculty-card"
+                    key={member._id}
+                  >
                     <div className="faculty-icon">👩‍🏫</div>
 
                     <div className="faculty-info">
@@ -92,20 +71,36 @@ function FacultyLocator() {
                       </p>
 
                       <p>
-                        <strong>Room:</strong> {member.room}
+                        <strong>Designation:</strong>{" "}
+                        {member.designation}
+                      </p>
+
+                      <p>
+                        <strong>Room:</strong>{" "}
+                        {member.roomNumber || "Not assigned"}
+                      </p>
+
+                      <p>
+                        <strong>Building:</strong>{" "}
+                        {member.building || "Not assigned"}
                       </p>
 
                       <p>
                         <strong>Status:</strong>{" "}
                         <span
                           className={
-                            member.status === "Available"
+                            member.availability === "Available"
                               ? "status-available"
                               : "status-busy"
                           }
                         >
-                          {member.status}
+                          {member.availability}
                         </span>
+                      </p>
+
+                      <p>
+                        <strong>Email:</strong>{" "}
+                        {member.email}
                       </p>
                     </div>
 

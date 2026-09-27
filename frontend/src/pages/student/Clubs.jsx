@@ -1,58 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import { get } from "../../services/api";
 
 function Clubs() {
   const [search, setSearch] = useState("");
+  const [clubs, setClubs] = useState([]);
 
-  const clubs = [
-    {
-      name: "Coding Club",
-      category: "Technology",
-      description:
-        "Learn programming, participate in coding competitions and build projects.",
-      members: 85,
-    },
-    {
-      name: "Robotics Club",
-      category: "Technology",
-      description:
-        "Explore robotics, automation and hardware-based projects.",
-      members: 60,
-    },
-    {
-      name: "Photography Club",
-      category: "Arts",
-      description:
-        "Capture campus life, learn photography and participate in photo events.",
-      members: 45,
-    },
-    {
-      name: "Music Club",
-      category: "Cultural",
-      description:
-        "Join fellow students interested in singing, instruments and performances.",
-      members: 70,
-    },
-    {
-      name: "Dance Club",
-      category: "Cultural",
-      description:
-        "Learn different dance styles and perform at college events.",
-      members: 55,
-    },
-    {
-      name: "Sports Club",
-      category: "Sports",
-      description:
-        "Participate in sports activities, tournaments and fitness events.",
-      members: 100,
-    },
-  ];
+  useEffect(() => {
+    const loadClubs = async () => {
+      try {
+        const data = await get("/clubs");
+        setClubs(data);
+      } catch (error) {
+        console.error("Failed to load clubs:", error);
+      }
+    };
+
+    loadClubs();
+  }, []);
 
   const filteredClubs = clubs.filter(
     (club) =>
-      club.name.toLowerCase().includes(search.toLowerCase()) ||
+      club.clubName.toLowerCase().includes(search.toLowerCase()) ||
       club.category.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -85,20 +55,43 @@ function Clubs() {
 
             <div className="clubs-grid">
               {filteredClubs.length > 0 ? (
-                filteredClubs.map((club, index) => (
-                  <div className="club-card" key={index}>
+                filteredClubs.map((club) => (
+                  <div className="club-card" key={club._id}>
                     <div className="club-icon">🏛️</div>
 
-                    <h3>{club.name}</h3>
+                    <h3>{club.clubName}</h3>
 
                     <p className="club-category">
                       {club.category}
                     </p>
 
-                    <p>{club.description}</p>
+                    <p>
+                      {club.description || "No description available."}
+                    </p>
 
                     <p>
-                      <strong>Members:</strong> {club.members}
+                      <strong>Members:</strong>{" "}
+                      {club.members ? club.members.length : 0}
+                    </p>
+
+                    <p>
+                      <strong>Faculty Coordinator:</strong>{" "}
+                      {club.facultyCoordinator?.name || "Not assigned"}
+                    </p>
+
+                    <p>
+                      <strong>President:</strong>{" "}
+                      {club.president?.name || "Not assigned"}
+                    </p>
+
+                    <p>
+                      <strong>Meeting:</strong>{" "}
+                      {club.meetingLocation || "Not specified"}
+                    </p>
+
+                    <p>
+                      <strong>Time:</strong>{" "}
+                      {club.meetingTime || "Not specified"}
                     </p>
 
                     <button>Join Club</button>

@@ -3,7 +3,7 @@ const Student = require("../../database/models/Student");
 // GET all students
 const getStudents = async (req, res) => {
   try {
-    const students = await Student.find();
+    const students = await Student.find().select("-password");
 
     res.status(200).json(students);
   } catch (error) {
