@@ -7,23 +7,30 @@ function AdminDashboard() {
   const [faculty, setFaculty] = useState([]);
   const [clubs, setClubs] = useState([]);
   const [events, setEvents] = useState([]);
+  const [halls, setHalls] = useState([]);
+  const [bookings, setBookings] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadStats = async () => {
+    const loadAdminData = async () => {
       try {
         const data = await get("/admin/stats");
         const studentData = await get("/students");
         const facultyData = await get("/faculty");
         const clubData = await get("/clubs");
         const eventData = await get("/events");
+        const hallData = await get("/halls");
+        const bookingData = await get("/bookings");
 
         setStats(data);
         setStudents(studentData);
         setFaculty(facultyData);
         setClubs(clubData);
         setEvents(eventData);
+        setHalls(hallData);
+        setBookings(bookingData);
       } catch (err) {
         console.error("Failed to load admin data:", err);
         setError("Failed to load admin data.");
@@ -32,7 +39,7 @@ function AdminDashboard() {
       }
     };
 
-    loadStats();
+    loadAdminData();
   }, []);
 
   if (loading) {
@@ -46,7 +53,10 @@ function AdminDashboard() {
   return (
     <div className="admin-dashboard">
       <h1>College Admin Dashboard</h1>
-      <p>Manage and monitor the UNISYNC campus system.</p>
+
+      <p>
+        Manage and monitor the UNISYNC campus system.
+      </p>
 
       {/* ==================== */}
       {/* DASHBOARD STATISTICS */}
@@ -341,6 +351,151 @@ function AdminDashboard() {
                 <strong>Club Category:</strong>{" "}
                 {event.club?.category ||
                   "Not available"}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ==================== */}
+      {/* HALLS */}
+      {/* ==================== */}
+
+      <div className="admin-halls">
+        <h2>Halls</h2>
+
+        {halls.length === 0 ? (
+          <p>No halls found.</p>
+        ) : (
+          halls.map((hall) => (
+            <div
+              className="admin-hall-card"
+              key={hall._id}
+            >
+              <h3>
+                {hall.hallName ||
+                  hall.name ||
+                  "Unnamed Hall"}
+              </h3>
+
+              <p>
+                <strong>Building:</strong>{" "}
+                {hall.building ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Location:</strong>{" "}
+                {hall.location ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Capacity:</strong>{" "}
+                {hall.capacity ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                {hall.isAvailable !== undefined
+                  ? hall.isAvailable
+                    ? "Available"
+                    : "Unavailable"
+                  : "Not specified"}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ==================== */}
+      {/* BOOKINGS */}
+      {/* ==================== */}
+
+      <div className="admin-bookings">
+        <h2>Hall Bookings</h2>
+
+        {bookings.length === 0 ? (
+          <p>No bookings found.</p>
+        ) : (
+          bookings.map((booking) => (
+            <div
+              className="admin-booking-card"
+              key={booking._id}
+            >
+              <h3>
+                {booking.hall?.hallName ||
+                  "Hall Booking"}
+              </h3>
+
+              <p>
+                <strong>Booked By:</strong>{" "}
+                {booking.bookedBy?.name ||
+                  "Unknown student"}
+              </p>
+
+              <p>
+                <strong>Email:</strong>{" "}
+                {booking.bookedBy?.email ||
+                  "Not available"}
+              </p>
+
+              <p>
+                <strong>Department:</strong>{" "}
+                {booking.bookedBy?.department ||
+                  "Not available"}
+              </p>
+
+              <p>
+                <strong>Hall:</strong>{" "}
+                {booking.hall?.hallName ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Building:</strong>{" "}
+                {booking.hall?.building ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Location:</strong>{" "}
+                {booking.hall?.location ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Capacity:</strong>{" "}
+                {booking.hall?.capacity ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Date:</strong>{" "}
+                {booking.date
+                  ? new Date(
+                      booking.date
+                    ).toLocaleDateString()
+                  : "Not specified"}
+              </p>
+
+              <p>
+                <strong>Start Time:</strong>{" "}
+                {booking.startTime ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>End Time:</strong>{" "}
+                {booking.endTime ||
+                  "Not specified"}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                {booking.status ||
+                  "Pending"}
               </p>
             </div>
           ))
