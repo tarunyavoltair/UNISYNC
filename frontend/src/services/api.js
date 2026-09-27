@@ -3,22 +3,25 @@ const API_BASE_URL =
 
 // Common API request function
 async function apiRequest(endpoint, options = {}) {
+  const token = localStorage.getItem("token");
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
-    ...options,
   });
 
   if (!response.ok) {
     const errorText = await response.text();
+
     throw new Error(
       errorText || `API request failed with status ${response.status}`
     );
   }
 
-  // Some requests may not return a response body
   if (response.status === 204) {
     return null;
   }
