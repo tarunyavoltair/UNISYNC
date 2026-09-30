@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import { get, post } from "../../services/api";
 import EventQRCode from "../../components/EventQRCode";
 import EventQRScanner from "../../components/EventQRScanner";
+import CertificateDownload from "../../components/CertificateDownload";
 
 function Events() {
   const [search, setSearch] = useState("");
@@ -316,6 +317,7 @@ function Events() {
                         certificate.issuedAt
                       ).toLocaleDateString()}
                     </p>
+                    <CertificateDownload certificate={certificate} />
                   </div>
                 ))}
               </div>
