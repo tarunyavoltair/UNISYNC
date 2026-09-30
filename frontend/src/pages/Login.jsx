@@ -25,14 +25,20 @@ function Login() {
 
       console.log("Login response:", response);
 
-      // Store login information
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
       setMessage("Login successful!");
 
-      // Go to student dashboard
-      navigate("/student");
+      if (response.user.role === "admin") {
+        navigate("/admin");
+      } else if (response.user.role === "faculty") {
+        navigate("/faculty");
+      } else if (response.user.role === "club-admin") {
+        navigate("/club-admin");
+      } else {
+        navigate("/student");
+      }
     } catch (error) {
       console.error("Login error:", error);
       setMessage("Login failed. Please check your credentials.");
@@ -40,30 +46,38 @@ function Login() {
   };
 
   return (
-    <div>
-      <h1>Welcome to UNISYNC</h1>
+    <div className="login-page">
+      <div className="login-card">
+        <h1>Welcome to UNISYNC</h1>
 
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="College Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <p>Smart Campus Portal</p>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
+          <label htmlFor="email">College Email</label>
 
-        <button type="submit">
-          Login
-        </button>
-      </form>
+          <input
+            id="email"
+            type="email"
+            placeholder="Enter your college email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-      {message && <p>{message}</p>}
+          <label htmlFor="password">Password</label>
+
+          <input
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button type="submit">Login</button>
+        </form>
+
+        {message && <p>{message}</p>}
+      </div>
     </div>
   );
 }
