@@ -76,6 +76,12 @@ const eventSchema = new mongoose.Schema(
       default: 0,
     },
 
+    // Whether students who attend this event can receive a certificate
+    certificateEnabled: {
+      type: Boolean,
+      default: false,
+    },
+
     status: {
       type: String,
       enum: ["upcoming", "ongoing", "completed", "cancelled"],

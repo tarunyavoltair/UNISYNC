@@ -8,6 +8,7 @@ import EventQRScanner from "../../components/EventQRScanner";
 function Events() {
   const [search, setSearch] = useState("");
   const [events, setEvents] = useState([]);
+  const [certificates, setCertificates] = useState([]);
   const [message, setMessage] = useState("");
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -24,6 +25,25 @@ function Events() {
 
     loadEvents();
   }, []);
+
+  // Load certificates belonging to the logged-in student
+  useEffect(() => {
+    const loadCertificates = async () => {
+      try {
+        if (!user?.id) {
+          return;
+        }
+
+        const data = await get(`/certificates/student/${user.id}`);
+
+        setCertificates(data);
+      } catch (error) {
+        console.error("Failed to load certificates:", error);
+      }
+    };
+
+    loadCertificates();
+  }, [user?.id]);
 
   const handleRegister = async (eventId) => {
     try {
@@ -75,6 +95,13 @@ function Events() {
 
       const updatedEvents = await get("/events");
       setEvents(updatedEvents);
+
+      // Reload certificates after successful check-in
+      const updatedCertificates = await get(
+        `/certificates/student/${currentUser.id}`
+      );
+
+      setCertificates(updatedCertificates);
     } catch (error) {
       console.error("Check-in failed:", error);
       setMessage(error.message);
@@ -257,10 +284,42 @@ function Events() {
               </div>
 
               <div>
-                <h3>0</h3>
+                <h3>{certificates.length}</h3>
                 <p>Certificates</p>
               </div>
             </div>
+
+            {/* Certificate List */}
+            {certificates.length > 0 && (
+              <div className="certificate-list">
+                <h3>🏆 My Certificates</h3>
+
+                {certificates.map((certificate) => (
+                  <div
+                    className="certificate-card"
+                    key={certificate._id}
+                  >
+                    <p>
+                      <strong>Certificate ID:</strong>{" "}
+                      {certificate.certificateId}
+                    </p>
+
+                    <p>
+                      <strong>Event:</strong>{" "}
+                      {certificate.event?.eventName ||
+                        "Event"}
+                    </p>
+
+                    <p>
+                      <strong>Issued:</strong>{" "}
+                      {new Date(
+                        certificate.issuedAt
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </main>
       </div>

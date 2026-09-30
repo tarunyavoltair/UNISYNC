@@ -1,5 +1,6 @@
 const Event = require("../../database/models/Event");
 const Student = require("../../database/models/Student");
+const Certificate = require("../../database/models/Certificate");
 
 // GET all events
 const getEvents = async (req, res) => {
@@ -151,13 +152,33 @@ const checkInToEvent = async (req, res) => {
 
     student.xp += event.xpReward || 0;
 
-    await student.save();
+await student.save();
 
-    res.status(200).json({
-      message: "Check-in successful. XP awarded.",
-      xpAwarded: event.xpReward || 0,
-      totalXP: student.xp,
+let certificate = null;
+
+if (event.certificateEnabled) {
+  certificate = await Certificate.findOne({
+    student: student._id,
+    event: event._id,
+  });
+
+  if (!certificate) {
+    const certificateId = `CERT-${Date.now()}-${student.studentId}`;
+
+    certificate = await Certificate.create({
+      student: student._id,
+      event: event._id,
+      certificateId,
     });
+  }
+}
+
+res.status(200).json({
+  message: "Check-in successful. XP awarded.",
+  xpAwarded: event.xpReward || 0,
+  totalXP: student.xp,
+  certificate,
+});
   } catch (error) {
     console.error("Event check-in error:", error);
 
