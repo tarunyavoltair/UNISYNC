@@ -8,6 +8,8 @@ function Events() {
   const [events, setEvents] = useState([]);
   const [message, setMessage] = useState("");
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
     const loadEvents = async () => {
       try {
@@ -23,20 +25,20 @@ function Events() {
 
   const handleRegister = async (eventId) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const currentUser = JSON.parse(localStorage.getItem("user"));
 
-      if (!user || !user.id) {
+      if (!currentUser || !currentUser.id) {
         setMessage("Please login again.");
         return;
       }
 
       const response = await post(`/events/${eventId}/register`, {
-        studentId: user.id,
+        studentId: currentUser.id,
       });
 
       setMessage(response.message);
 
-      // Update attendee count immediately
+      // Update attendee list immediately
       setEvents((currentEvents) =>
         currentEvents.map((event) =>
           event._id === eventId
@@ -48,15 +50,75 @@ function Events() {
         )
       );
     } catch (error) {
-  console.error("Registration failed:", error);
-  setMessage(error.message);
-}
+      console.error("Registration failed:", error);
+      setMessage(error.message);
+    }
+  };
+
+  const handleCheckIn = async (eventId) => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+
+      if (!currentUser || !currentUser.id) {
+        setMessage("Please login again.");
+        return;
+      }
+
+      const response = await post(`/events/${eventId}/check-in`, {
+        studentId: currentUser.id,
+      });
+
+      setMessage(
+        `${response.message} You earned ${response.xpAwarded} XP.`
+      );
+
+      // Refresh events after check-in
+      const updatedEvents = await get("/events");
+      setEvents(updatedEvents);
+    } catch (error) {
+      console.error("Check-in failed:", error);
+      setMessage(error.message);
+    }
+  };
+
+  const isRegistered = (event) => {
+    if (!user?.id || !event.attendees) {
+      return false;
+    }
+
+    return event.attendees.some(
+      (attendee) => attendee._id === user.id
+    );
+  };
+
+  const isCheckedIn = (event) => {
+    if (!user?.id || !event.attendedBy) {
+      return false;
+    }
+
+    return event.attendedBy.some(
+      (student) => student._id === user.id
+    );
   };
 
   const filteredEvents = events.filter(
     (event) =>
-      event.eventName.toLowerCase().includes(search.toLowerCase()) ||
-      event.category.toLowerCase().includes(search.toLowerCase())
+      event.eventName
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      event.category
+        .toLowerCase()
+        .includes(search.toLowerCase())
+  );
+
+  // Calculate Event Passport information
+  const attendedEvents = events.filter((event) =>
+    isCheckedIn(event)
+  );
+
+  const eventXP = attendedEvents.reduce(
+    (total, event) => total + (event.xpReward || 0),
+    0
   );
 
   return (
@@ -135,12 +197,30 @@ function Events() {
                         : ""}
                     </p>
 
+                    {/* Registration */}
                     <button
                       type="button"
                       onClick={() => handleRegister(event._id)}
+                      disabled={isRegistered(event)}
                     >
-                      Register
+                      {isRegistered(event)
+                        ? "Registered ✓"
+                        : "Register"}
                     </button>
+
+                    {/* Check-in */}
+                    {isRegistered(event) && (
+                      <button
+                        type="button"
+                        onClick={() => handleCheckIn(event._id)}
+                        disabled={isCheckedIn(event)}
+                        style={{ marginLeft: "10px" }}
+                      >
+                        {isCheckedIn(event)
+                          ? "Checked In ✓"
+                          : "Check In"}
+                      </button>
+                    )}
                   </div>
                 ))
               ) : (
@@ -149,6 +229,7 @@ function Events() {
             </div>
           </section>
 
+          {/* Event Passport */}
           <section className="event-passport">
             <h2>🎫 Event Passport</h2>
 
@@ -159,12 +240,12 @@ function Events() {
 
             <div className="passport-info">
               <div>
-                <h3>0</h3>
+                <h3>{attendedEvents.length}</h3>
                 <p>Events Attended</p>
               </div>
 
               <div>
-                <h3>0 XP</h3>
+                <h3>{eventXP} XP</h3>
                 <p>Event XP Earned</p>
               </div>
 

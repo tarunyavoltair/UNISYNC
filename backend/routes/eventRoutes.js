@@ -6,6 +6,7 @@ const {
   getEvents,
   createEvent,
   registerForEvent,
+  checkInToEvent,
 } = require("../controllers/eventController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -21,6 +22,13 @@ router.post(
   "/:id/register",
   protect,
   registerForEvent
+);
+
+// Check-in a student for an event
+router.post(
+  "/:id/check-in",
+  protect,
+  checkInToEvent
 );
 
 module.exports = router;

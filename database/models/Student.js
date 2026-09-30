@@ -51,8 +51,15 @@ const studentSchema = new mongoose.Schema(
       default: [],
     },
 
-    password: { type: String, required: true },
-role: { type: String, default: "student" },
+    password: {
+      type: String,
+      required: true,
+    },
+
+    role: {
+      type: String,
+      default: "student",
+    },
   },
   {
     timestamps: true,

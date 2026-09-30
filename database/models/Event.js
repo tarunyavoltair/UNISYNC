@@ -51,7 +51,16 @@ const eventSchema = new mongoose.Schema(
       type: String,
     },
 
+    // Students who registered for the event
     attendees: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Student",
+      },
+    ],
+
+    // Students who actually attended / checked in
+    attendedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Student",
