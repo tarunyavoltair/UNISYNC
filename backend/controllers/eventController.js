@@ -5,13 +5,14 @@ const getEvents = async (req, res) => {
   try {
     const events = await Event.find()
       .populate("organizer", "name email department")
-      .populate("club", "clubName category");
+      .populate("club", "clubName category")
+      .populate("attendees", "name email studentId");
 
     res.status(200).json(events);
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch events",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -25,12 +26,74 @@ const createEvent = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       message: "Failed to create event",
-      error: error.message
+      error: error.message,
+    });
+  }
+};
+
+// REGISTER student for an event
+const registerForEvent = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+
+    if (!studentId) {
+      return res.status(400).json({
+        message: "Student ID is required.",
+      });
+    }
+
+    const event = await Event.findById(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({
+        message: "Event not found.",
+      });
+    }
+
+    // Prevent duplicate registration
+    const alreadyRegistered = event.attendees.some(
+      (attendee) => attendee.toString() === studentId
+    );
+
+    if (alreadyRegistered) {
+      return res.status(400).json({
+        message: "Student is already registered for this event.",
+      });
+    }
+
+    // Check maximum capacity
+    if (
+      event.maxAttendees &&
+      event.attendees.length >= event.maxAttendees
+    ) {
+      return res.status(400).json({
+        message: "This event has reached maximum capacity.",
+      });
+    }
+
+    event.attendees.push(studentId);
+
+    await event.save();
+
+    const updatedEvent = await Event.findById(event._id).populate(
+      "attendees",
+      "name email studentId"
+    );
+
+    res.status(200).json({
+      message: "Successfully registered for the event.",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to register for event.",
+      error: error.message,
     });
   }
 };
 
 module.exports = {
   getEvents,
-  createEvent
+  createEvent,
+  registerForEvent,
 };

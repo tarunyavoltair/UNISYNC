@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
-import { get } from "../../services/api";
+import { get, post } from "../../services/api";
 
 function Events() {
   const [search, setSearch] = useState("");
   const [events, setEvents] = useState([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -19,6 +20,38 @@ function Events() {
 
     loadEvents();
   }, []);
+
+  const handleRegister = async (eventId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user || !user.id) {
+        setMessage("Please login again.");
+        return;
+      }
+
+      const response = await post(`/events/${eventId}/register`, {
+        studentId: user.id,
+      });
+
+      setMessage(response.message);
+
+      // Update attendee count immediately
+      setEvents((currentEvents) =>
+        currentEvents.map((event) =>
+          event._id === eventId
+            ? {
+                ...event,
+                attendees: response.event.attendees,
+              }
+            : event
+        )
+      );
+    } catch (error) {
+  console.error("Registration failed:", error);
+  setMessage(error.message);
+}
+  };
 
   const filteredEvents = events.filter(
     (event) =>
@@ -40,6 +73,8 @@ function Events() {
             Discover campus events, register for activities and build your
             Event Passport.
           </p>
+
+          {message && <p>{message}</p>}
 
           <div className="event-search">
             <input
@@ -100,7 +135,12 @@ function Events() {
                         : ""}
                     </p>
 
-                    <button>Register</button>
+                    <button
+                      type="button"
+                      onClick={() => handleRegister(event._id)}
+                    >
+                      Register
+                    </button>
                   </div>
                 ))
               ) : (
