@@ -113,20 +113,34 @@ function AppRoutes() {
           }
         />
 
-        {/* Other portals */}
+        {/* Faculty Portal */}
         <Route
           path="/faculty"
-          element={<FacultyDashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["faculty"]}>
+              <FacultyDashboard />
+            </ProtectedRoute>
+          }
         />
 
+        {/* Club Admin Portal */}
         <Route
           path="/club-admin"
-          element={<ClubDashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["club-admin"]}>
+              <ClubDashboard />
+            </ProtectedRoute>
+          }
         />
 
+        {/* College Admin Portal */}
         <Route
           path="/admin"
-          element={<AdminDashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </BrowserRouter>

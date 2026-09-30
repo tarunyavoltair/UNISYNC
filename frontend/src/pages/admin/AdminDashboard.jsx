@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { get } from "../../services/api";
+import { get, put } from "../../services/api";
 
 function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -41,6 +41,40 @@ function AdminDashboard() {
 
     loadAdminData();
   }, []);
+
+  const handleApproveBooking = async (bookingId) => {
+    try {
+      await put(`/bookings/${bookingId}/approve`);
+
+      setBookings((currentBookings) =>
+        currentBookings.map((booking) =>
+          booking._id === bookingId
+            ? { ...booking, status: "approved" }
+            : booking
+        )
+      );
+    } catch (err) {
+      console.error("Failed to approve booking:", err);
+      setError("Failed to approve booking.");
+    }
+  };
+
+  const handleRejectBooking = async (bookingId) => {
+    try {
+      await put(`/bookings/${bookingId}/reject`);
+
+      setBookings((currentBookings) =>
+        currentBookings.map((booking) =>
+          booking._id === bookingId
+            ? { ...booking, status: "rejected" }
+            : booking
+        )
+      );
+    } catch (err) {
+      console.error("Failed to reject booking:", err);
+      setError("Failed to reject booking.");
+    }
+  };
 
   if (loading) {
     return <p>Loading admin dashboard...</p>;
@@ -497,6 +531,33 @@ function AdminDashboard() {
                 {booking.status ||
                   "Pending"}
               </p>
+
+              {/* Booking Actions */}
+              {booking.status === "pending" && (
+                <div className="booking-actions">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleApproveBooking(
+                        booking._id
+                      )
+                    }
+                  >
+                    Approve
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleRejectBooking(
+                        booking._id
+                      )
+                    }
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}
