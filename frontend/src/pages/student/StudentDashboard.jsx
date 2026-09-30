@@ -1,9 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 
 function StudentDashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className="dashboard-container">
       <Navbar />
@@ -38,8 +40,10 @@ function StudentDashboard() {
             </div>
           </div>
 
-          {/* Main sections */}
+          {/* Main Sections */}
           <div className="dashboard-sections">
+
+            {/* What's Happening */}
             <section className="dashboard-section">
               <h2>📢 What's Happening Now?</h2>
 
@@ -59,6 +63,7 @@ function StudentDashboard() {
               </div>
             </section>
 
+            {/* Recent Achievements */}
             <section className="dashboard-section">
               <h2>🏆 Recent Achievements</h2>
 
@@ -86,6 +91,7 @@ function StudentDashboard() {
                 </div>
               </div>
             </section>
+
           </div>
 
           {/* Quick Actions */}
@@ -93,39 +99,46 @@ function StudentDashboard() {
             <h2>⚡ Quick Actions</h2>
 
             <div className="quick-action-grid">
-              <Link to="/student/lost-found">
+
+              <button
+                onClick={() => navigate("/student/lost-found")}
+              >
                 🔎 Report Lost Item
-              </Link>
+              </button>
 
-              <Link to="/student/map">
+              <button
+                onClick={() => navigate("/student/map")}
+              >
                 🗺️ Open Campus Map
-              </Link>
+              </button>
 
-              <Link to="/student/faculty">
+              <button
+                onClick={() => navigate("/student/faculty")}
+              >
                 👩‍🏫 Find Faculty
-              </Link>
+              </button>
 
-              <Link to="/student/clubs">
+              <button
+                onClick={() => navigate("/student/clubs")}
+              >
                 🏛️ Explore Clubs
-              </Link>
+              </button>
 
-              <Link to="/student/events">
+              <button
+                onClick={() => navigate("/student/events")}
+              >
                 📅 View Events
-              </Link>
+              </button>
 
-              <Link to="/student/hall-booking">
+              <button
+                onClick={() => navigate("/student/hall-booking")}
+              >
                 🏢 Book a Hall
-              </Link>
+              </button>
 
-              <Link to="/student/digital-id">
-                🪪 Digital ID
-              </Link>
-
-              <Link to="/student/achievements">
-                🏆 XP & Achievements
-              </Link>
             </div>
           </section>
+
         </main>
       </div>
     </div>
