@@ -23,7 +23,7 @@ const seedData = async () => {
     await Hall.deleteMany({});
     await CampusLocation.deleteMany({});
 
-    // Students
+    // Students and Admin
     const students = await Student.insertMany([
       {
         studentId: "STU001",
@@ -50,6 +50,19 @@ const seedData = async () => {
         xp: 250,
         badges: ["Club Member", "Event Explorer"],
         role: "student",
+      },
+      {
+        studentId: "ADM001",
+        name: "UNISYNC Admin",
+        password: await bcrypt.hash("admin123", 10),
+        email: "admin@unisync.com",
+        department: "Administration",
+        year: 4,
+        section: "A",
+        phone: "9876543212",
+        xp: 0,
+        badges: [],
+        role: "admin",
       },
     ]);
 
@@ -198,3 +211,4 @@ const seedData = async () => {
 };
 
 seedData();
+

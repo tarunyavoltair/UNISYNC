@@ -12,7 +12,10 @@ const protect = (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
 
     req.user = decoded;
 
@@ -24,6 +27,20 @@ const protect = (req, res, next) => {
   }
 };
 
+// Role-based authorization
+const authorizeRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: "Access denied. You do not have permission.",
+      });
+    }
+
+    next();
+  };
+};
+
 module.exports = {
   protect,
+  authorizeRoles,
 };
