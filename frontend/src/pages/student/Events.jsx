@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import { get, post } from "../../services/api";
+import EventQRCode from "../../components/EventQRCode";
+import EventQRScanner from "../../components/EventQRScanner";
 
 function Events() {
   const [search, setSearch] = useState("");
@@ -38,7 +40,6 @@ function Events() {
 
       setMessage(response.message);
 
-      // Update attendee list immediately
       setEvents((currentEvents) =>
         currentEvents.map((event) =>
           event._id === eventId
@@ -72,7 +73,6 @@ function Events() {
         `${response.message} You earned ${response.xpAwarded} XP.`
       );
 
-      // Refresh events after check-in
       const updatedEvents = await get("/events");
       setEvents(updatedEvents);
     } catch (error) {
@@ -111,7 +111,6 @@ function Events() {
         .includes(search.toLowerCase())
   );
 
-  // Calculate Event Passport information
   const attendedEvents = events.filter((event) =>
     isCheckedIn(event)
   );
@@ -208,7 +207,7 @@ function Events() {
                         : "Register"}
                     </button>
 
-                    {/* Check-in */}
+                    {/* Manual Check-in */}
                     {isRegistered(event) && (
                       <button
                         type="button"
@@ -221,6 +220,11 @@ function Events() {
                           : "Check In"}
                       </button>
                     )}
+
+                    {/* Event QR Code */}
+                    {isRegistered(event) && (
+                      <EventQRCode eventId={event._id} />
+                    )}
                   </div>
                 ))
               ) : (
@@ -228,6 +232,9 @@ function Events() {
               )}
             </div>
           </section>
+
+          {/* QR Scanner */}
+          <EventQRScanner />
 
           {/* Event Passport */}
           <section className="event-passport">
