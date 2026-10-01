@@ -16,7 +16,16 @@ const getLostFoundItems = async (req, res) => {
 // POST create a lost/found item
 const createLostFoundItem = async (req, res) => {
   try {
-    const newItem = await LostItem.create(req.body);
+    // Get the authenticated student's ID from the JWT
+    const studentId = req.user.id;
+
+    const itemData = {
+      ...req.body,
+      reportedBy: studentId,
+    };
+
+    const newItem = await LostItem.create(itemData);
+
     res.status(201).json(newItem);
   } catch (error) {
     res.status(400).json({
