@@ -64,6 +64,19 @@ const seedData = async () => {
         badges: [],
         role: "admin",
       },
+      {
+        studentId: "CLUB001",
+        name: "UNISYNC Club Admin",
+        password: await bcrypt.hash("club123", 10),
+        email: "clubadmin@unisync.com",
+        department: "Computer Science",
+        year: 4,
+        section: "A",
+        phone: "9876543213",
+        xp: 0,
+        badges: [],
+        role: "club-admin",
+      },
     ]);
 
     // Faculty
@@ -211,4 +224,3 @@ const seedData = async () => {
 };
 
 seedData();
-
