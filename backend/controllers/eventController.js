@@ -34,16 +34,11 @@ const createEvent = async (req, res) => {
   }
 };
 
-// REGISTER student for an event
+// REGISTER authenticated student for an event
 const registerForEvent = async (req, res) => {
   try {
-    const { studentId } = req.body;
-
-    if (!studentId) {
-      return res.status(400).json({
-        message: "Student ID is required.",
-      });
-    }
+    // Get the authenticated student's ID from the JWT
+    const studentId = req.user.id;
 
     const event = await Event.findById(req.params.id);
 
@@ -95,7 +90,7 @@ const registerForEvent = async (req, res) => {
   }
 };
 
-// CHECK-IN student for an event
+// CHECK-IN authenticated student for an event
 const checkInToEvent = async (req, res) => {
   try {
     // Get the authenticated student's ID from the JWT
