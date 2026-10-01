@@ -23,7 +23,15 @@ const getEvents = async (req, res) => {
 // POST create an event
 const createEvent = async (req, res) => {
   try {
-    const newEvent = await Event.create(req.body);
+    // Get the authenticated student's ID from the JWT
+    const studentId = req.user.id;
+
+    const eventData = {
+      ...req.body,
+      organizer: studentId,
+    };
+
+    const newEvent = await Event.create(eventData);
 
     res.status(201).json(newEvent);
   } catch (error) {
