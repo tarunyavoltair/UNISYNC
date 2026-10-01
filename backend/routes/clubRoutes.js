@@ -7,10 +7,18 @@ const {
   createClub
 } = require("../controllers/clubController");
 
-const { protect } = require("../middleware/authMiddleware");
+const {
+  protect,
+  authorizeRoles,
+} = require("../middleware/authMiddleware");
 
 router.get("/", protect, getClubs);
 
-router.post("/", protect, createClub);
+router.post(
+  "/",
+  protect,
+  authorizeRoles("club-admin"),
+  createClub
+);
 
 module.exports = router;
