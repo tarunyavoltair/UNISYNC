@@ -98,13 +98,8 @@ const registerForEvent = async (req, res) => {
 // CHECK-IN student for an event
 const checkInToEvent = async (req, res) => {
   try {
-    const { studentId } = req.body;
-
-    if (!studentId) {
-      return res.status(400).json({
-        message: "Student ID is required.",
-      });
-    }
+    // Get the authenticated student's ID from the JWT
+    const studentId = req.user.id;
 
     const event = await Event.findById(req.params.id);
 
@@ -136,7 +131,7 @@ const checkInToEvent = async (req, res) => {
       });
     }
 
-    // Add student to attendance list
+    // Add authenticated student to attendance list
     event.attendedBy.push(studentId);
 
     await event.save();
@@ -152,33 +147,34 @@ const checkInToEvent = async (req, res) => {
 
     student.xp += event.xpReward || 0;
 
-await student.save();
+    await student.save();
 
-let certificate = null;
+    // Generate certificate if enabled
+    let certificate = null;
 
-if (event.certificateEnabled) {
-  certificate = await Certificate.findOne({
-    student: student._id,
-    event: event._id,
-  });
+    if (event.certificateEnabled) {
+      certificate = await Certificate.findOne({
+        student: student._id,
+        event: event._id,
+      });
 
-  if (!certificate) {
-    const certificateId = `CERT-${Date.now()}-${student.studentId}`;
+      if (!certificate) {
+        const certificateId = `CERT-${Date.now()}-${student.studentId}`;
 
-    certificate = await Certificate.create({
-      student: student._id,
-      event: event._id,
-      certificateId,
+        certificate = await Certificate.create({
+          student: student._id,
+          event: event._id,
+          certificateId,
+        });
+      }
+    }
+
+    res.status(200).json({
+      message: "Check-in successful. XP awarded.",
+      xpAwarded: event.xpReward || 0,
+      totalXP: student.xp,
+      certificate,
     });
-  }
-}
-
-res.status(200).json({
-  message: "Check-in successful. XP awarded.",
-  xpAwarded: event.xpReward || 0,
-  totalXP: student.xp,
-  certificate,
-});
   } catch (error) {
     console.error("Event check-in error:", error);
 
