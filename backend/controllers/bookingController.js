@@ -19,7 +19,15 @@ const getBookings = async (req, res) => {
 // POST create a booking
 const createBooking = async (req, res) => {
   try {
-    const newBooking = await Booking.create(req.body);
+    // Get the authenticated student's ID from the JWT
+    const studentId = req.user.id;
+
+    const bookingData = {
+      ...req.body,
+      bookedBy: studentId,
+    };
+
+    const newBooking = await Booking.create(bookingData);
 
     res.status(201).json(newBooking);
   } catch (error) {
