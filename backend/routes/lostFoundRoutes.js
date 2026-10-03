@@ -6,7 +6,9 @@ const {
   createLostFoundItem
 } = require("../controllers/lostFoundController");
 
-router.get("/", getLostFoundItems);
-router.post("/", createLostFoundItem);
+const { protect } = require("../middleware/authMiddleware");
+
+router.get("/", protect, getLostFoundItems);
+router.post("/", protect, createLostFoundItem);
 
 module.exports = router;
